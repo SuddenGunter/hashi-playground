@@ -1,0 +1,60 @@
+{
+    "builders": [{
+        "type": "digitalocean",
+        "api_token": "{{user `do_token`}}",
+        "image": "{{user `base_os_image`}}",
+        "region": "ams3",
+        "size": "s-1vcpu-1gb",
+        "ssh_username": "root"
+    }],
+    "provisioners": [
+        {
+        "type": "shell",
+        "inline": [                      
+            "adduser --disabled-password --gecos '' {{user `system_username`}}",
+            "echo '{{user `system_username`}}:{{user `system_password`}}' | sudo chpasswd",
+            "usermod -aG sudo {{user `system_username`}}",
+            
+            "sudo apt update -q",
+            "sudo ucf --purge /boot/grub/menu.lst",
+            "sudo DEBIAN_FRONTEND=noninteractive UCF_FORCE_CONFFNEW=YES apt-get upgrade -yq",
+      
+            "sudo DEBIAN_FRONTEND=noninteractive apt install -yq apt-transport-https ca-certificates curl unzip software-properties-common",
+            "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
+            "sudo add-apt-repository  -y 'deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable'",
+            "sudo apt update -q",
+            "sudo apt-get install -yq docker-ce docker-ce-cli containerd.io",
+            "sudo systemctl enable docker",
+      
+            "sudo usermod -aG docker {{user `system_username`}}",
+
+            "wget https://releases.hashicorp.com/nomad/{{user `nomad_version`}}/nomad_{{user `nomad_version`}}_linux_amd64.zip",
+            "unzip nomad_{{user `nomad_version`}}_linux_amd64.zip",
+            "rm nomad_{{user `nomad_version`}}_linux_amd64.zip",
+            "mkdir /opt/nomadbin/",
+            "mv nomad /opt/nomadbin/nomad",
+
+            "wget https://releases.hashicorp.com/consul/{{user `consul_version`}}/consul_{{user `consul_version`}}_linux_amd64.zip",
+            "unzip consul_{{user `consul_version`}}_linux_amd64.zip",
+            "rm consul_{{user `consul_version`}}_linux_amd64.zip",
+            "mkdir /opt/consulbin/",
+            "mv consul /opt/consulbin/consul",
+
+            "mkdir /home/{{user `system_username`}}/.ssh/"
+          ]
+       },
+       {
+        "type": "file",
+        "source": "{{user `ssh_private_key_file`}}",
+        "destination": "/home/{{user `system_username`}}/.ssh/authorized_keys"
+      },
+      {
+        "type": "shell",
+        "inline": [
+            "ls -la /home/{{user `system_username`}}/.ssh/",
+            "chown {{user `system_username`}} /home/{{user `system_username`}}/.ssh/authorized_keys",
+            "rm ~/.ssh/authorized_keys"
+          ]
+      }
+    ]
+}        
