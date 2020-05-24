@@ -33,12 +33,14 @@
             "rm nomad_{{user `nomad_version`}}_linux_amd64.zip",
             "mkdir /opt/nomadbin/",
             "mv nomad /opt/nomadbin/nomad",
+            "echo 'export PATH=$PATH:/opt/nomadbin/' >> /etc/profile",
 
             "wget https://releases.hashicorp.com/consul/{{user `consul_version`}}/consul_{{user `consul_version`}}_linux_amd64.zip",
             "unzip consul_{{user `consul_version`}}_linux_amd64.zip",
             "rm consul_{{user `consul_version`}}_linux_amd64.zip",
             "mkdir /opt/consulbin/",
             "mv consul /opt/consulbin/consul",
+            "echo 'export PATH=$PATH:/opt/consulbin/' >> /etc/profile",
 
             "mkdir /home/{{user `system_username`}}/.ssh/"
           ]

@@ -1,7 +1,11 @@
+locals {
+  firewallIps = concat(var.allowed_ips, [digitalocean_droplet.nomadworker1.ipv4_address,digitalocean_droplet.nomadworker2.ipv4_address,digitalocean_droplet.nomadworker3.ipv4_address])
+}
+
 resource "digitalocean_firewall" "only_home_allowed" {
   name = "only-home-access-allowed"
 
-  droplet_ids = [digitalocean_droplet.nomadworker1.id]
+  droplet_ids = [digitalocean_droplet.nomadworker1.id, digitalocean_droplet.nomadworker2.id, digitalocean_droplet.nomadworker3.id]
 
   inbound_rule {
     protocol         = "tcp"
@@ -12,13 +16,13 @@ resource "digitalocean_firewall" "only_home_allowed" {
   inbound_rule {
     protocol         = "tcp"
     port_range       = "all"
-    source_addresses = var.allowed_ips
+    source_addresses = local.firewallIps
   }
 
   inbound_rule {
     protocol         = "udp"
     port_range       = "all"
-    source_addresses = var.allowed_ips
+    source_addresses = local.firewallIps
   }
 
   outbound_rule {
