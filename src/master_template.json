@@ -14,18 +14,22 @@
             "adduser --disabled-password --gecos '' {{user `system_username`}}",
             "echo '{{user `system_username`}}:{{user `system_password`}}' | sudo chpasswd",
             "usermod -aG sudo {{user `system_username`}}",
-            
+            "rsync --archive --chown={{user `system_username`}}:{{user `system_username`}} ~/.ssh /home/{{user `system_username`}}",
+
             "sudo apt update -q",
             "sudo ucf --purge /boot/grub/menu.lst",
             "sudo DEBIAN_FRONTEND=noninteractive UCF_FORCE_CONFFNEW=YES apt-get upgrade -yq",
       
             "sudo DEBIAN_FRONTEND=noninteractive apt install -yq apt-transport-https ca-certificates curl unzip software-properties-common",
             "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-            "sudo add-apt-repository  -y 'deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable'",
+            "sudo add-apt-repository -y 'deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable'",
             "sudo apt update -q",
-            "sudo apt-get install -yq docker-ce docker-ce-cli containerd.io",
+            "sudo apt-cache policy docker-ce",
+            "sudo apt-get install -yq docker-ce",
             "sudo systemctl enable docker",
-      
+            "sudo curl -L 'https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)' -o /usr/local/bin/docker-compose",
+            "sudo chmod +x /usr/local/bin/docker-compose",
+
             "sudo usermod -aG docker {{user `system_username`}}",
 
             "wget https://releases.hashicorp.com/nomad/{{user `nomad_version`}}/nomad_{{user `nomad_version`}}_linux_amd64.zip",
